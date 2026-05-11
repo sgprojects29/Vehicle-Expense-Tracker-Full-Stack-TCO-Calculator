@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database (Production)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: vehicle-expense-db-prod
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vehicleexpensedb
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - vehicle-expense-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Backend API (Production)
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vehicle-expense-api-prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=vehicleexpensedb;Username=postgres;Password=postgres
+      - Jwt__SecretKey=YourSuperSecretKeyHere_ChangeInProduction_MinimumLength32Characters
+      - Jwt__Issuer=VehicleExpenseAPI
+      - Jwt__Audience=VehicleExpenseClient
+      - Jwt__ExpirationMinutes=60
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vehicle-expense-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend (Production with Nginx)
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: vehicle-expense-frontend-prod
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - vehicle-expense-network
+    restart: unless-stopped
+
+networks:
+  vehicle-expense-network:
+    driver: bridge
+
+volumes:
+  postgres_data_prod:
