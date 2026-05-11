@@ -702,29 +702,6 @@ var vehicles = await _context.Vehicles
 - [ ] Expiry tracking for insurance/registration docs
 
 
-## 📄 License
-
-MIT
-
-## 👤 Author
-
-**James Dunford**
-Full-stack portfolio project demonstrating backend API development, JWT authentication, database design, React frontend, and containerized deployment.
-
-- GitHub: [@JamesD9406](https://github.com/JamesD9406)
-- Live Demo: [https://vehicle-expense-frontend.fly.dev](https://vehicle-expense-frontend.fly.dev)
-
-
-## 🙏 Acknowledgments
-
-- **ASP.NET Core** — Microsoft's cross-platform framework
-- **React** — Meta's UI library
-- **Fly.io** — Simple, affordable cloud hosting
-- **TailwindCSS** — Utility-first CSS framework
-- **Recharts** — React charting library
-
-
-
 
 
 
