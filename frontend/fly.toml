@@ -1,0 +1,37 @@
+# Fly.io configuration for Vehicle Expense Tracker Frontend
+# Deploy with: fly deploy
+
+app = "vehicle-expense-frontend"
+primary_region = "ord"  # Chicago - change to your preferred region
+
+[build]
+  dockerfile = "Dockerfile.prod"
+  [build.args]
+    VITE_API_URL = "https://vehicle-expense-backend.fly.dev/api"
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  
+  # Health check configuration
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/"
+
+# VM configuration (smaller for static frontend)
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+# Note: VITE_API_URL is set as a build argument in [build.args] above
+# It gets baked into the static files during the Docker build process
