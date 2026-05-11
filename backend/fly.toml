@@ -1,0 +1,40 @@
+# Fly.io configuration for Vehicle Expense Tracker Backend
+# Deploy with: fly deploy
+
+app = "vehicle-expense-backend"
+primary_region = "ord"  # Chicago - change to your preferred region
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  ASPNETCORE_URLS = "http://+:8080"
+  Jwt__Issuer = "VehicleExpenseAPI"
+  Jwt__Audience = "VehicleExpenseClient"
+  Jwt__ExpirationMinutes = "60"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  
+  # Health check configuration
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+# VM configuration
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
+
+# Secrets to set via CLI:
+# fly secrets set Jwt__SecretKey="YourProductionSecretKeyHere" -a vehicle-expense-backend
+# Database connection will be auto-configured when you attach Fly Postgres
